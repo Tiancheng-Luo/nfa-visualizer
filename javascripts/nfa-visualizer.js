@@ -23,7 +23,7 @@ NFAVisualizer.visualize = function(selector, nfa) {
   height = svg.height.baseVal.value;
 
   var states = {};
-  var interval = width / (nfa.stateCount + 1);
+  var interval = width / (nfa.statesCount + 1);
   var i = 1;
   for (var label in nfa.states) {
     var state = SVG.create('circle', { cx: interval * i++, cy: height / 2, r: 12, label: label });
@@ -87,10 +87,10 @@ NFAVisualizer.visualize = function(selector, nfa) {
     }
   }
 
-  var indicator = NFAVisualizer.getStartStateIndicator(states[nfa.startState().label]);
+  var indicator = NFAVisualizer.getStartStateIndicator(states[nfa.getStartState().label]);
   svg.appendChild(indicator);
 
-  var finalStates = nfa.finalStates();
+  var finalStates = nfa.getFinalStates();
   for (i = 0; i < finalStates.length; i++) {
     states[finalStates[i].label].classList.add('final');
   }
