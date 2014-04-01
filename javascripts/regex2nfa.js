@@ -14,7 +14,10 @@ RegexParser.parse = function(regex) {
         nfa.getStartState().transition(state.finalize(), token.content);
         concatStack.push(nfa);
       } else if (token.content == '*') {
-        var nfa = concatStack.pop();
+        var nfa = new NFA('ab');
+        var popped = concatStack.pop();
+        var newStates = nfa.absorb(popped);
+        nfa.getStartState().transition(newStates[popped.getStartState().label], '~');
         var finalStates = nfa.getFinalStates();
         for (var j = 0; j < finalStates.length; j++) {
           finalStates[j].transition(nfa.getStartState(), '~');
@@ -155,6 +158,29 @@ NFA.prototype.absorb = function(nfa) {
     }
   }
   return newStates;
+}
+
+NFA.prototype.accepts = function(input, state) {
+  state = state || this.getStartState();
+  if (input.length) {
+    var symbol = input.charAt(0);
+    if (symbol in state.transitions) {
+      for (var i = 0; i < state.transitions[symbol].length; i++) {
+        if (this.accepts(input.substring(1), state.transitions[symbol][i])) {
+          return true;
+        }
+      }
+    }
+    if ('~' in state.transitions) {
+      for (var i = 0; i < state.transitions['~'].length; i++) {
+        if (this.accepts(input, state.transitions['~'][i])) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+  return state.final;
 }
 
 
