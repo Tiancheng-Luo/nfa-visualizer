@@ -49,7 +49,20 @@ NFAVisualizer.visualize = function(selector, nfa) {
         var n = s.x < d.x ? 'r' : 'l';
         var c = NFAVisualizer.getCurveControlPoints(distance, f, n);
 
-        if (document.querySelector('path[source="' + sl + '"][destination="' + dl + '"]')
+        if (sl == dl) {
+          c = { x1: -45, y1: -55, x2: 45, y2: -55 };
+          var transition = SVG.create('path', { d: NFAVisualizer.generatePathDefinition(s, c, d), source: sl, destination: dl, symbol: symbol });
+          var label = NFAVisualizer.getTransitionLabel(s, c, symbol);
+          var control = { x: s.x + c.x1, y: s.y + c.y1 };
+          var angle = Math.angle(d, control) - 5;
+          var origin = Math.coordinates(d, 12, angle);
+          var arrowHead = NFAVisualizer.getArrowHead(origin, angle);
+          arrowHead.setAttribute('source', sl);
+          arrowHead.setAttribute('destination', dl);
+          transitionsGroup.appendChild(transition);
+          labelsGroup.appendChild(label);
+          arrowHeadsGroup.appendChild(arrowHead);
+        } else if (document.querySelector('path[source="' + sl + '"][destination="' + dl + '"]')
           || document.querySelector('path[source="' + dl + '"][destination="' + sl + '"]')
           || distance > interval * 1.5) {
           while (document.querySelector('path[d="' + NFAVisualizer.generatePathDefinition(s, c, d) + '"]') && f > 0) {
@@ -69,6 +82,8 @@ NFAVisualizer.visualize = function(selector, nfa) {
           }
           var origin = Math.coordinates(d, 12, angle);
           var arrowHead = NFAVisualizer.getArrowHead(origin, angle);
+          arrowHead.setAttribute('source', sl);
+          arrowHead.setAttribute('destination', dl);
           transitionsGroup.appendChild(transition);
           labelsGroup.appendChild(label);
           arrowHeadsGroup.appendChild(arrowHead);
@@ -79,6 +94,8 @@ NFAVisualizer.visualize = function(selector, nfa) {
           var angle = Math.angle(d, s);
           var origin = Math.coordinates(d, 12, angle);
           var arrowHead = NFAVisualizer.getArrowHead(origin, angle);
+          arrowHead.setAttribute('source', sl);
+          arrowHead.setAttribute('destination', dl);
           transitionsGroup.appendChild(transition);
           labelsGroup.appendChild(label);
           arrowHeadsGroup.appendChild(arrowHead);

@@ -1,5 +1,9 @@
-var regex = '(a+b)*';
+var regex = '(a+b)*ababa';
 var nfa = RegexParser.parse(regex); 
+
+var a = nfa.getState('q0');
+a.transition(a, 'a');
+
 NFAVisualizer.visualize('#nfa', nfa);
 
 var events = [];
@@ -17,11 +21,13 @@ function step() {
     if (current) {
       previous = events.shift().state;
       var label = document.querySelector('.labels p.current');
-      var transition = document.querySelector('path.current');
+      var transition = document.querySelectorAll('path.current');
       current.classList.remove('current');
       label.classList.remove('current');
       if (transition) {
-        transition.classList.remove('current');
+        for (var i = 0; i < transition.length; i++) {
+          transition[i].classList.remove('current');
+        }
       }
     }
     var state = events.shift().state;
@@ -32,9 +38,11 @@ function step() {
     if (previous) {
       var source = previous.label;
       var destination = state.getAttribute('label');
-      var transition = document.querySelector('path[source="' + source + '"][destination="' + destination + '"]');
+      var transition = document.querySelectorAll('path[source="' + source + '"][destination="' + destination + '"]');
       if (transition) {
-        transition.classList.add('current');
+        for (var i = 0; i < transition.length; i++) {
+          transition[i].classList.add('current');
+        }
       }
     }
     setTimeout(step, 500);
