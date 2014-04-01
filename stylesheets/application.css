@@ -26,6 +26,10 @@ body {
   -webkit-transform: translate(-55%, -55%);
 }
 
+.labels p.current {
+  color: #ffffff;
+}
+
 svg {
   display: block;
 }
@@ -46,6 +50,11 @@ circle.control {
   fill: #aa0000;
 }
 
+circle.current {
+  stroke: #014924;
+  fill: #016D36;
+}
+
 path {
   stroke: #333333;
   stroke-width: 1px;
@@ -57,5 +66,10 @@ path.control {
 }
 
 path.indicator {
+  stroke-width: 2px;
+}
+
+path.current {
+  stroke: #014924;
   stroke-width: 2px;
 }

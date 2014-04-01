@@ -121,6 +121,7 @@ NFAVisualizer.getStateLabel = function(state) {
   label.textContent = state.getAttribute('label');
   label.style.top = state.getAttribute('cy') + 'px';
   label.style.left = state.getAttribute('cx') + 'px';
+  label.setAttribute('for', state.getAttribute('label'));
   return label;
 }
 

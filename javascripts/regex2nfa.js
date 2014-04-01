@@ -92,14 +92,72 @@ RegexParser.combine = function(nfas) {
   return null;
 }
 
-RegexParser.validate = function(regex, alphabet) {
+RegexParser.validate = function(regex, symbols) {
+  var parenthesisStack = [];
+  var characterStack = [];
+
+  for (var i = 0; i < regex.length; i++) {
+    var character = regex.charAt(i);
+    characterStack.push(character);
+    
+    if (character == "+") {
+      if (i - 1 < 0 || i + 1 >= regex.length) {
+        console.log("Operator is misplaced.");
+        return false;
+      } else {
+        var prevChar = regex.charAt(i-1);
+        var nextChar = regex.charAt(i+1);
+
+        if (["a", "b"].indexOf(nextChar) == -1 || nextChar == ")" || nextChar == "+" || 
+            ["a", "b"].indexOf(prevChar) == -1 || prevChar == "(" || prevChar == "+"
+            ) {
+          console.log("Operator is misplaced.");
+          return false;
+        }
+      }
+    } else if (character == "*") {
+      if (characterStack[characterStack.length-1] == "+") {
+        console.log("Misplaced '*'.");
+        return false;
+      }
+    } else if (character == "(") {
+      parenthesisStack.push(character);
+    } else if (character == ")") {
+      if (parenthesisStack.length == 0) {
+        console.log("Parentheses are not balanced.");
+        return false;
+      } 
+      parenthesisStack.pop();
+    } else if (["a", "b"].indexOf(character) == -1){
+      console.log(character + " is not in the alphabet.");
+      return false;
+    }
+  }
+
+  if (parenthesisStack.length) {
+    console.log("Parentheses are not balanced.");
+    return false;
+  }
+
   return true;
 }
 
 RegexParser.clean = function(regex) {
-  return regex;
-}
+  var cleanRegex = "";
 
+  for (var i = 0; i < regex.length; i++) {
+    var character = regex.charAt(i);
+
+    if (character == "*" && cleanRegex.charAt(i - 1) == "*") {
+      continue;
+    } 
+
+    cleanRegex += character;
+  }
+
+  console.log(cleanRegex);
+  return cleanRegex
+}
 
 
 
@@ -177,11 +235,12 @@ NFA.prototype.absorb = function(nfa) {
 
 NFA.prototype.accepts = function(input, state) {
   state = state || this.getStartState();
-  this.dispatchEvent('yield', { state: state });
+  this.dispatchEvent('yield', { state: state, type: 'destination' });
   if (input.length) {
     var symbol = input.charAt(0);
     if (symbol in state.transitions) {
       for (var i = 0; i < state.transitions[symbol].length; i++) {
+        this.dispatchEvent('yield', { state: state, type: 'source' });
         if (this.accepts(input.substring(1), state.transitions[symbol][i])) {
           return true;
         }
@@ -189,6 +248,7 @@ NFA.prototype.accepts = function(input, state) {
     }
     if ('~' in state.transitions) {
       for (var i = 0; i < state.transitions['~'].length; i++) {
+        this.dispatchEvent('yield', { state: state, type: 'source' });
         if (this.accepts(input, state.transitions['~'][i])) {
           return true;
         }
