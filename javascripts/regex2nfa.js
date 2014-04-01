@@ -1,7 +1,13 @@
 function RegexParser() {}
-RegexParser.parse = function(regex) {
+RegexParser.parse = function(regex, alphabet) {
+  alphabet = alphabet || 'ab';
+  if (!RegexParser.validate(regex, alphabet)) {
+    throw new ParsingError('The RegEx you provided is invalid.');
+    return false;
+  }
+
+  regex = RegexParser.clean(regex);
   var tokens = RegexParser.tokenize(regex);
-  var alphabet = 'ab';
   var concatStack = [];
   var unionStack = [];
 
@@ -86,6 +92,14 @@ RegexParser.combine = function(nfas) {
   return null;
 }
 
+RegexParser.validate = function(regex, alphabet) {
+  return true;
+}
+
+RegexParser.clean = function(regex) {
+  return regex;
+}
+
 
 
 
@@ -96,6 +110,7 @@ function NFA(alphabet) {
   this.statesCount = 0;
   this.startState = this.addState();
 }
+NFA.prototype = new CustomEvent();
 
 NFA.prototype.addState = function(label) {
   label = label || this.generateStateLabel();
@@ -162,6 +177,7 @@ NFA.prototype.absorb = function(nfa) {
 
 NFA.prototype.accepts = function(input, state) {
   state = state || this.getStartState();
+  this.dispatchEvent('yield', { state: state });
   if (input.length) {
     var symbol = input.charAt(0);
     if (symbol in state.transitions) {
@@ -210,3 +226,49 @@ State.prototype.unfinalize = function() {
   this.final = false;
   return this;
 }
+
+
+
+
+
+
+function CustomEvent() {
+  this.events = {};
+}
+
+CustomEvent.prototype.addEventListener = function(name, callback) {
+  if (!(name in this.events)) {
+    this.events[name] = [];
+  }
+  this.events[name].push(callback);
+}
+
+CustomEvent.prototype.removeEventListener = function(name, callback) {
+  if (name in this.events) {
+    for (var i = 0; i < this.events[name].length; i++) {
+      if (this.events[name][i] === callback) {
+        this.events[name].splice(i, 1);
+      }
+    }
+  }
+}
+
+CustomEvent.prototype.dispatchEvent = function(name, data) {
+  if (name in this.events) {
+    data = data || {};
+    data['target'] = this;
+    for (var i = 0; i < this.events[name].length; i++) {
+      this.events[name][i](data);
+    }
+  }
+}
+
+
+
+
+
+function ParsingError(message) {
+  this.name = 'ParsingError';
+  this.message = message;
+}
+ParsingError.prototype = Error.prototype;
