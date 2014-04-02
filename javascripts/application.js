@@ -1,5 +1,5 @@
 var regex = '(a+b)*+aba(ab+ab*+a)*';
-var nfa = RegexParser.parse(regex); 
+var nfa = RegexParser.parse(regex);
 NFAVisualizer.visualize('#nfa', nfa);
 
 var states = [];
